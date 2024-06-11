@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:ecommerce_app/src/common_widgets/custom_text_button.dart';
 import 'package:ecommerce_app/src/common_widgets/responsive_two_column_layout.dart';
 import 'package:ecommerce_app/src/constants/app_sizes.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../routing/app_router.dart';
 
 /// Simple widget to show the product purchase date along with a button to
 /// leave a review.
 class LeaveReviewAction extends StatelessWidget {
   const LeaveReviewAction({super.key, required this.productId});
+
   final String productId;
 
   @override
@@ -39,12 +43,8 @@ class LeaveReviewAction extends StatelessWidget {
                   .textTheme
                   .bodyLarge!
                   .copyWith(color: Colors.green[700]),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  fullscreenDialog: true,
-                  builder: (_) => LeaveReviewScreen(productId: productId),
-                ),
-              ),
+              onPressed: () => context.goNamed(AppRoute.leaveReview.name,
+                  pathParameters: {'id': productId}),
             ),
           ),
           gapH8,
