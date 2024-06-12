@@ -29,6 +29,8 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     // ! width of the screen. If that's not the case, LayoutBuilder should be
     // ! used instead.
     final screenWidth = MediaQuery.of(context).size.width;
+
+
     if (screenWidth < Breakpoint.tablet) {
       return AppBar(
         title: Text('My Shop'.hardcoded),
