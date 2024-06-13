@@ -1,42 +1,56 @@
 import 'dart:math';
 
+import 'package:ecommerce_app/src/common_widgets/async_value_widget.dart';
+import 'package:ecommerce_app/src/common_widgets/error_message_widget.dart';
 import 'package:ecommerce_app/src/features/products/data/fake_products_repository.dart';
+import 'package:ecommerce_app/src/features/products/domain/product.dart';
 import 'package:ecommerce_app/src/features/products/presentation/products_list/product_card.dart';
 import 'package:ecommerce_app/src/localization/string_hardcoded.dart';
 import 'package:ecommerce_app/src/routing/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'package:ecommerce_app/src/constants/app_sizes.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// A widget that displays the list of products that match the search query.
-class ProductsGrid extends StatelessWidget {
+class ProductsGrid extends ConsumerWidget {
   const ProductsGrid({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Read from data source
-    final products = FakeProductsRepository.instance.getProductsList();
-    return products.isEmpty
-        ? Center(
-            child: Text(
-              'No products found'.hardcoded,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          )
-        : ProductsLayoutGrid(
-            itemCount: products.length,
-            itemBuilder: (_, index) {
-              final product = products[index];
-              return ProductCard(
-                product: product,
-                onPressed: () => context.goNamed(
-                  AppRoute.product.name,
-                  pathParameters: {'id': product.id},
+    // final products = FakeProductsRepository.instance.getProductsList();
+
+    // final productsListValue = ref.watch(productListStreamProvider);
+
+    final productsListValue = ref.watch(productsListFutureProvider);
+
+    return AsyncValueWidget<List<Product>>(
+      value: productsListValue,
+      data: (products) {
+        return products.isEmpty
+            ? Center(
+                child: Text(
+                  'No products found'.hardcoded,
+                  style: Theme.of(context).textTheme.headlineMedium,
                 ),
+              )
+            : ProductsLayoutGrid(
+                itemCount: products.length,
+                itemBuilder: (_, index) {
+                  final product = products[index];
+                  return ProductCard(
+                    product: product,
+                    onPressed: () => context.goNamed(
+                      AppRoute.product.name,
+                      pathParameters: {'id': product.id},
+                    ),
+                  );
+                },
               );
-            },
-          );
+      },
+    );
   }
 }
 
@@ -73,8 +87,10 @@ class ProductsLayoutGrid extends StatelessWidget {
       return LayoutGrid(
         columnSizes: columnSizes,
         rowSizes: rowSizes,
-        rowGap: Sizes.p24, // equivalent to mainAxisSpacing
-        columnGap: Sizes.p24, // equivalent to crossAxisSpacing
+        rowGap: Sizes.p24,
+        // equivalent to mainAxisSpacing
+        columnGap: Sizes.p24,
+        // equivalent to crossAxisSpacing
         children: [
           // render all the items with automatic child placement
           for (var i = 0; i < itemCount; i++) itemBuilder(context, i),

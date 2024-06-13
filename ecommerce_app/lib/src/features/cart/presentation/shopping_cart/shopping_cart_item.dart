@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:ecommerce_app/src/common_widgets/alert_dialogs.dart';
+import 'package:ecommerce_app/src/common_widgets/async_value_widget.dart';
 import 'package:ecommerce_app/src/features/products/data/fake_products_repository.dart';
 import 'package:ecommerce_app/src/localization/string_hardcoded.dart';
 import 'package:flutter/material.dart';
@@ -10,16 +11,18 @@ import 'package:ecommerce_app/src/common_widgets/responsive_two_column_layout.da
 import 'package:ecommerce_app/src/constants/app_sizes.dart';
 import 'package:ecommerce_app/src/features/cart/domain/item.dart';
 import 'package:ecommerce_app/src/features/products/domain/product.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 /// Shows a shopping cart item (or loading/error UI if needed)
-class ShoppingCartItem extends StatelessWidget {
+class ShoppingCartItem extends ConsumerWidget {
   const ShoppingCartItem({
     super.key,
     required this.item,
     required this.itemIndex,
     this.isEditable = true,
   });
+
   final Item item;
   final int itemIndex;
 
@@ -29,19 +32,28 @@ class ShoppingCartItem extends StatelessWidget {
   final bool isEditable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // TODO: Read from data source
-    final product = FakeProductsRepository.instance.getProduct(item.productId)!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: Sizes.p8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(Sizes.p16),
-          child: ShoppingCartItemContents(
-            product: product,
-            item: item,
-            itemIndex: itemIndex,
-            isEditable: isEditable,
+    // final product = FakeProductsRepository.instance.getProduct(item.productId)!;
+
+    // final product = ref.watch(productsRepositoryProvider).getProduct(item.productId)!;
+
+    final productValue = ref.watch(productProvider(item.productId));
+
+
+    return AsyncValueWidget<Product?>(
+      value: productValue,
+      data: (product) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: Sizes.p8),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(Sizes.p16),
+            child: ShoppingCartItemContents(
+              product: product!,
+              item: item,
+              itemIndex: itemIndex,
+              isEditable: isEditable,
+            ),
           ),
         ),
       ),
@@ -58,6 +70,7 @@ class ShoppingCartItemContents extends StatelessWidget {
     required this.itemIndex,
     required this.isEditable,
   });
+
   final Product product;
   final Item item;
   final int itemIndex;
@@ -82,7 +95,8 @@ class ShoppingCartItemContents extends StatelessWidget {
         children: [
           Text(product.title, style: Theme.of(context).textTheme.headlineSmall),
           gapH24,
-          Text(priceFormatted, style: Theme.of(context).textTheme.headlineSmall),
+          Text(priceFormatted,
+              style: Theme.of(context).textTheme.headlineSmall),
           gapH24,
           isEditable
               // show the quantity selector and a delete button
