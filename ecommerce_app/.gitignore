@@ -120,4 +120,6 @@ firebase-exports
 .env.prod
 
 # Ignore test coverage data
-coverage/lcov.info
+coverage/
+
+**/failures/*.png
