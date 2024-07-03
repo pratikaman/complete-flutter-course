@@ -13,6 +13,8 @@ class ItemQuantitySelector extends StatelessWidget {
   final int quantity;
   final int maxQuantity;
   final int? itemIndex;
+
+  /// typedef ValueChanged<T> = void Function(T value);
   final ValueChanged<int>? onChanged;
 
   // * Keys for testing using find.byKey()
