@@ -5,7 +5,7 @@ import 'package:ecommerce_app/src/utils/in_memory_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FakeOrdersRepository {
-  FakeOrdersRepository({this.addDelay = true});
+  FakeOrdersRepository({this.addDelay = true});  
   final bool addDelay;
 
   /// A map of all the orders placed by each user, where:
@@ -17,19 +17,29 @@ class FakeOrdersRepository {
   /// Only user orders that match the given productId will be returned.
   /// If a productId is not passed, all user orders will be returned.
   Stream<List<Order>> watchUserOrders(String uid, {ProductID? productId}) {
+
     return _orders.stream.map((ordersData) {
+
       final ordersList = ordersData[uid] ?? [];
+
       ordersList.sort(
         (lhs, rhs) => rhs.orderDate.compareTo(lhs.orderDate),
       );
+
       if (productId != null) {
+
         return ordersList
             .where((order) => order.items.keys.contains(productId))
             .toList();
+
       } else {
+
         return ordersList;
+
       }
+      
     });
+
   }
 
   // A method to add a new order to the list for a given user

@@ -17,9 +17,10 @@ final userOrdersProvider = StreamProvider.autoDispose<List<Order>>((ref) {
 });
 
 /// Check if a product was previously purchased by the user
-final matchingUserOrdersProvider =
-    StreamProvider.autoDispose.family<List<Order>, ProductID>((ref, productId) {
+final matchingUserOrdersProvider = StreamProvider.autoDispose.family<List<Order>, ProductID>((ref, productId) {
+
   final user = ref.watch(authStateChangesProvider).value;
+
   if (user != null) {
     return ref
         .watch(ordersRepositoryProvider)
@@ -28,4 +29,5 @@ final matchingUserOrdersProvider =
     // If the user is null, return an empty list (no orders)
     return Stream.value([]);
   }
+  
 });
