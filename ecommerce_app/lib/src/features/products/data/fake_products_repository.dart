@@ -4,6 +4,7 @@ import 'package:ecommerce_app/src/constants/test_products.dart';
 import 'package:ecommerce_app/src/features/products/domain/product.dart';
 import 'package:ecommerce_app/src/utils/delay.dart';
 import 'package:ecommerce_app/src/utils/in_memory_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class FakeProductsRepository {
@@ -22,7 +23,8 @@ class FakeProductsRepository {
   }
 
   Future<List<Product>> fetchProductsList() async {
-    await delay(addDelay);
+    // await delay(addDelay);
+    await Future.delayed(const Duration(milliseconds: 1500));
     return Future.value(_products.value);
   }
 
@@ -56,6 +58,22 @@ class FakeProductsRepository {
       return null;
     }
   }
+
+  Future<List<Product>> searchProducts(String query) async {
+    
+    assert(
+      _products.value.length <= 100,
+      'Client-side search should only be performed if the number of products is small. '
+      'Consider doing server-side search for larger datasets.',
+    );
+
+    final productsList = await fetchProductsList();
+
+    return productsList
+        .where((product) =>
+            product.title.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+  }
 }
 
 final productsRepositoryProvider = Provider<FakeProductsRepository>((ref) {
@@ -79,4 +97,26 @@ final productProvider =
     StreamProvider.autoDispose.family<Product?, String>((ref, id) {
   final productsRepository = ref.watch(productsRepositoryProvider);
   return productsRepository.watchProduct(id);
+});
+
+
+
+/////// search with caching
+final productsListSearchProvider = FutureProvider.autoDispose.family<List<Product>, String>((ref, query) async {
+
+  final link = ref.keepAlive();
+
+  final timer = Timer(const Duration(seconds: 5), () {
+    link.close();
+  });
+  
+  ref.onDispose(() {
+    timer.cancel();
+    debugPrint('disposed: $query');
+  });
+
+  final productsRepository = ref.watch(productsRepositoryProvider);
+  
+  return productsRepository.searchProducts(query);
+
 });
